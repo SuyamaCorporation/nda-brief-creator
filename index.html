@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NDA概要作成ツール</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen p-4">
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-2xl font-bold text-blue-400 mb-1">📄 NDA概要作成ツール</h1>
+  <p class="text-gray-400 text-sm mb-6">秘密保持契約の要点を入力してMarkdown形式のNDA概要を出力</p>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <!-- 入力フォーム -->
+    <div class="space-y-4">
+      <!-- 当事者 -->
+      <section class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+        <h2 class="text-base font-semibold text-blue-300 mb-3">👥 当事者</h2>
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs text-gray-400 block mb-1" for="party-disclosing">開示者（Disclosing Party）</label>
+            <input id="party-disclosing" type="text" placeholder="株式会社A" aria-label="開示者"
+              class="w-full bg-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="updatePreview()">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 block mb-1" for="party-receiving">受領者（Receiving Party）</label>
+            <input id="party-receiving" type="text" placeholder="株式会社B" aria-label="受領者"
+              class="w-full bg-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="updatePreview()">
+          </div>
+        </div>
+      </section>
+
+      <!-- 契約期間 -->
+      <section class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+        <h2 class="text-base font-semibold text-blue-300 mb-3">📅 契約期間</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-gray-400 block mb-1" for="date-start">開始日</label>
+            <input id="date-start" type="date" aria-label="契約開始日"
+              class="w-full bg-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updatePreview()">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 block mb-1" for="date-end">終了日</label>
+            <input id="date-end" type="date" aria-label="契約終了日"
+              class="w-full bg-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="updatePreview()">
+          </div>
+        </div>
+      </section>
+
+      <!-- 秘密情報 -->
+      <section class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+        <h2 class="text-base font-semibold text-blue-300 mb-3">🔐 秘密情報の定義</h2>
+        <textarea id="confidential-def" rows="3" placeholder="例: 技術情報、顧客リスト、事業計画、財務情報等、書面または口頭で開示した全ての情報" aria-label="秘密情報の定義"
+          class="w-full bg-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" oninput="updatePreview()"></textarea>
+      </section>
+
+      <!-- 使用目的 -->
+      <section class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+        <h2 class="text-base font-semibold text-blue-300 mb-3">🎯 使用目的</h2>
+        <textarea id="purpose" rows="2" placeholder="例: 業務提携の可能性検討のみ" aria-label="使用目的"
+          class="w-full bg-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" oninput="updatePreview()"></textarea>
+      </section>
+
+      <!-- 義務事項 -->
+      <section class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+        <h2 class="text-base font-semibold text-blue-300 mb-3">⚖️ 義務事項</h2>
+        <textarea id="obligations" rows="3" placeholder="例: 第三者への開示禁止、目的外使用禁止、適切な管理措置の実施、漏洩時の即時通知" aria-label="義務事項"
+          class="w-full bg-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" oninput="updatePreview()"></textarea>
+      </section>
+
+      <!-- 例外事項 -->
+      <section class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+        <h2 class="text-base font-semibold text-blue-300 mb-3">🔓 例外事項</h2>
+        <textarea id="exceptions" rows="3" placeholder="例: 公知の情報、独自開発した情報、第三者から正当に取得した情報、法令上開示が義務付けられた情報" aria-label="例外事項"
+          class="w-full bg-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" oninput="updatePreview()"></textarea>
+      </section>
+
+      <!-- 準拠法 -->
+      <section class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+        <h2 class="text-base font-semibold text-blue-300 mb-3">🏛️ 準拠法・裁判管轄</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-gray-400 block mb-1" for="governing-law">準拠法</label>
+            <input id="governing-law" type="text" placeholder="日本法" aria-label="準拠法"
+              class="w-full bg-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="updatePreview()">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 block mb-1" for="jurisdiction">管轄裁判所</label>
+            <input id="jurisdiction" type="text" placeholder="東京地方裁判所" aria-label="管轄裁判所"
+              class="w-full bg-gray-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="updatePreview()">
+          </div>
+        </div>
+      </section>
+
+      <!-- 言語切替 & コピー -->
+      <div class="flex gap-3">
+        <div class="flex rounded-lg overflow-hidden border border-gray-700 flex-1">
+          <button onclick="setLang('ja')" id="btn-ja" aria-label="日本語出力"
+            class="flex-1 py-2 text-sm font-semibold transition bg-blue-600 text-white">日本語</button>
+          <button onclick="setLang('en')" id="btn-en" aria-label="English output"
+            class="flex-1 py-2 text-sm font-semibold transition bg-gray-800 text-gray-300 hover:bg-gray-700">English</button>
+        </div>
+        <button onclick="copyMarkdown()" aria-label="Markdownをコピー"
+          class="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-semibold transition">
+          📋 コピー
+        </button>
+      </div>
+      <div id="copy-msg" class="text-center text-green-400 text-sm hidden">コピーしました！</div>
+    </div>
+
+    <!-- プレビュー -->
+    <div class="sticky top-4">
+      <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
+        <h2 class="text-base font-semibold text-gray-300 mb-3">👁️ プレビュー</h2>
+        <pre id="preview" class="text-xs text-gray-300 whitespace-pre-wrap font-mono leading-relaxed max-h-screen overflow-y-auto"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let lang = 'ja';
+
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-ja').className = `flex-1 py-2 text-sm font-semibold transition ${l==='ja' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`;
+  document.getElementById('btn-en').className = `flex-1 py-2 text-sm font-semibold transition ${l==='en' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`;
+  updatePreview();
+}
+
+function getVal(id) { return document.getElementById(id)?.value || ''; }
+
+function generateMd() {
+  const d = getVal('party-disclosing') || '（未入力）';
+  const r = getVal('party-receiving') || '（未入力）';
+  const ds = getVal('date-start') || '（未入力）';
+  const de = getVal('date-end') || '（未入力）';
+  const conf = getVal('confidential-def') || '（未入力）';
+  const purp = getVal('purpose') || '（未入力）';
+  const obli = getVal('obligations') || '（未入力）';
+  const exc = getVal('exceptions') || '（未入力）';
+  const law = getVal('governing-law') || '（未入力）';
+  const jur = getVal('jurisdiction') || '（未入力）';
+
+  if (lang === 'en') {
+    return `# Non-Disclosure Agreement (NDA) Summary
+
+## Parties
+- **Disclosing Party**: ${d}
+- **Receiving Party**: ${r}
+
+## Term
+- **Start**: ${ds}
+- **End**: ${de}
+
+## Definition of Confidential Information
+${conf}
+
+## Purpose of Use
+${purp}
+
+## Obligations
+${obli}
+
+## Exceptions
+${exc}
+
+## Governing Law & Jurisdiction
+- **Governing Law**: ${law}
+- **Court of Jurisdiction**: ${jur}
+
+---
+*This document is a summary only and does not constitute a legally binding contract.*`;
+  }
+
+  return `# 秘密保持契約（NDA）概要
+
+## 当事者
+- **開示者**: ${d}
+- **受領者**: ${r}
+
+## 契約期間
+- **開始**: ${ds}
+- **終了**: ${de}
+
+## 秘密情報の定義
+${conf}
+
+## 使用目的
+${purp}
+
+## 義務事項
+${obli}
+
+## 例外事項
+${exc}
+
+## 準拠法・裁判管轄
+- **準拠法**: ${law}
+- **管轄裁判所**: ${jur}
+
+---
+*本書面はNDA概要のまとめであり、法的拘束力を持つ契約書ではありません。*`;
+}
+
+function updatePreview() {
+  document.getElementById('preview').textContent = generateMd();
+  saveState();
+}
+
+function copyMarkdown() {
+  navigator.clipboard.writeText(generateMd()).then(() => {
+    const msg = document.getElementById('copy-msg');
+    msg.classList.remove('hidden');
+    setTimeout(() => msg.classList.add('hidden'), 2000);
+  });
+}
+
+function saveState() {
+  const state = {};
+  ['party-disclosing','party-receiving','date-start','date-end','confidential-def',
+   'purpose','obligations','exceptions','governing-law','jurisdiction'].forEach(id => {
+    state[id] = getVal(id);
+  });
+  state.lang = lang;
+  localStorage.setItem('nda-state', JSON.stringify(state));
+}
+
+function loadState() {
+  const raw = localStorage.getItem('nda-state');
+  if (!raw) { updatePreview(); return; }
+  const state = JSON.parse(raw);
+  Object.entries(state).forEach(([id, val]) => {
+    if (id === 'lang') { setLang(val); return; }
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+  updatePreview();
+}
+
+loadState();
+</script>
+</body>
+</html>
